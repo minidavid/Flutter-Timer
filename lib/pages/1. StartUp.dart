@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:flutter/services.dart';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_connect/http/src/utils/utils.dart';
+//import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:tic80_mo/pages/start_up_controller.dart';
 
 class StartUp extends StatefulWidget {
@@ -44,7 +46,7 @@ class _StartUpState extends State<StartUp> {
     _timer = Timer.periodic(Duration(seconds: 1), (timer){
       if (finalTime.text== "")
       { 
-        finalTime.text = "1000";
+        finalTime.text = "0";
         finalTimeSec = 16;
         finalTimeMin = 0;
         finalTimeHour = 0;
@@ -116,49 +118,240 @@ class _StartUpState extends State<StartUp> {
   @override
   Widget build(BuildContext context) {
 
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
+    
     final BoxDecoration containerDecoration = _timerActive
         ? BoxDecoration(color: Colors.black)
         : BoxDecoration(color: Colors.red);
+
+    //final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
 
       appBar: AppBar(
-        title: Text("Pomodoro Timer"),
+        title: Text("Timer"),
       ),
 
-      floatingActionButton: FloatingActionButton(
-        child: Text(String.fromCharCode(5010)),
+      floatingActionButton: Stack(
+        children: [
+            
 
-        onPressed: (){
-          controller.count++;
-          debugPrint("${controller.count}");
-        },
 
+            Obx(()=>
+              Positioned(
+                bottom: 96,
+                right: 0,
+              
+                child: Column(children: 
+                [
+              
+                  Visibility(
+                    visible: controller.textFieldMap['isVisible']!.value,
+              
+                    child: TextButton(onPressed: ()
+                    {
+                      controller.textFieldMap['isSelected']!.value = true;
+                      controller.buttonMap['isSelected']!.value = false;
+                    },
+                        
+                        style: ButtonStyle(
+                          backgroundColor: WidgetStatePropertyAll(controller.textFieldMap['isSelected']!.value? Colors.red : Colors.white),
+                          shape: WidgetStateProperty.all<BeveledRectangleBorder>(BeveledRectangleBorder(borderRadius: BorderRadius.zero),
+                        ),
+              
+                        minimumSize: WidgetStatePropertyAll(Size(85,30)),
+                        maximumSize: WidgetStatePropertyAll(Size(85,40)),
+                      ),
+              
+                      child: Text("TextField",
+                        style: TextStyle(color: controller.textFieldMap['isSelected']!.value? Colors.white : Colors.blue[1000]),
+                      ),
+                    ),
+                  ),
+              
+                  ],),
+              
+                ),
+            ),
+
+
+            Obx(()=>
+              Positioned(
+                bottom: 58,
+                right: 0,
+              
+                child: Column(children: 
+                [
+              
+                  Visibility(
+                    visible: controller.buttonMap['isVisible']!.value,
+                    child: TextButton(onPressed: ()
+                    {
+                      controller.textFieldMap['isSelected']!.value = false;
+                      controller.buttonMap['isSelected']!.value = true;
+                    },
+                      style: ButtonStyle(
+                        backgroundColor: WidgetStatePropertyAll(controller.buttonMap['isSelected']!.value? Colors.red : Colors.white),
+                        shape: WidgetStateProperty.all<BeveledRectangleBorder>(BeveledRectangleBorder(borderRadius: BorderRadius.zero),),
+                        minimumSize: WidgetStatePropertyAll(Size(85,30)),
+                        maximumSize: WidgetStatePropertyAll(Size(85,40)),
+              
+                      ), 
+                      
+                      child: Text("Buttons",
+                        style: TextStyle(color: controller.buttonMap['isSelected']!.value? Colors.white : Colors.blue[1000])
+                      ),
+                      
+                    ),
+                  ),
+                ],),
+              ),
+            ),
+              
+
+
+
+          Positioned(
+            bottom: 5,
+            right: 12,
+
+            child: FloatingActionButton(
+              tooltip: 'Choose how you want to enter time',
+              shape: BeveledRectangleBorder(side: BorderSide(color: Colors.white)),
+              onPressed: (){
+                controller.count++;
+                debugPrint("${controller.count}");
+                controller.buttonMap['isVisible']!.value = !controller.buttonMap['isVisible']!.value;
+                controller.textFieldMap['isVisible']!.value = !controller.textFieldMap['isVisible']!.value;
+              },
+              
+            
+                child: Text(String.fromCharCode(5010)),
+              ),
+          ),
+        ],
       ),
     
 
       body: SingleChildScrollView(
+        
         child: Container(
           padding: EdgeInsets.all(8.0),
           decoration: containerDecoration,
         
+      
           child: Column(children: [
-        
+            Text("textfield: ${controller.textFieldMap['isVisible']!.value}"),
+            Text("buttonview: ${controller.buttonMap['isVisible']!.value}"),
+
             Obx(
               ()=> Text("${controller.count}"),
             ),
-        
-            Padding(
-              padding: const EdgeInsets.only(top: 120.0),
-              child: TextField(
-                controller: finalTime,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(filled: true, hintText: "Stop Time", label: Text("Stop At:"), alignLabelWithHint: true),
-                style: TextStyle(fontSize: 48),
+
+            //////This is the TextField that appears\\\\\\\
+            
+            Stack(
+              children: [
+                Obx(()=>
+                  Padding(
+                    padding: const EdgeInsets.only(top: 120.0),
+                    
+                  
+                    child: Visibility(
+                      visible: controller.textFieldMap['isSelected']!.value,
+                  
+                      child: TextField(
+                        controller: finalTime,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(filled: true, hintText: "Stop Time", label: Text("Stop At:"), alignLabelWithHint: true),
+                        style: TextStyle(fontSize: 48),
+                      ),
+                    ),
+                
+                
+                  ),
+                ),
+              
+              
+
+              ///// \\\\\\
+              Obx(()=>
+                Padding(
+                  padding: const EdgeInsets.only(top: 108.0),
+                  
+                  child: Visibility(
+                    visible: controller.buttonMap['isSelected']!.value,
+                                 
+                    child: Column(
+                      children: [
+                        
+                        Row(children: [
+                          Text("Hours"),
+                          Text("Minutes"),
+                          Text("Seconds"),
+                        ],),
+
+                        Row(
+                          spacing: 100.0,
+                          children: [
+                            for (var listing in [controller.hoursList, controller.minutesList, controller.secondsList])
+                            Expanded(
+                              child: SizedBox(
+                                height: 116,
+                        
+                                child: Transform(
+                                  alignment: Alignment.center,
+                                  transform: MatrixUtils.createCylindricalProjectionTransform(
+                                    radius: 0.001,
+                                    angle: 0.0,
+                                    perspective: 0.04,
+                                    
+                                  ),
+                        
+                                  child: ListView.builder(
+                                    itemCount: listing.length,
+                                    scrollDirection: Axis.vertical,
+                                  
+                                    itemBuilder: (_, index){
+                                      final value = num.tryParse(listing[index].toString()) ?? 0;
+                        
+                        
+                                      return TextButton(
+                                        onPressed: (){
+                                          if (listing == controller.hoursList){ finalTime.text = (value*3600).toString();}
+                                          else if(listing == controller.minutesList){ finalTime.text = (value*60).toString();}
+                                          else if(listing == controller.secondsList){ finalTime.text = value.toString();}
+                                        },
+                                  
+                                        style: ButtonStyle(backgroundColor: WidgetStatePropertyAll(Colors.white)),
+                                        child: Text(listing[index].toString()),
+                                      );
+                                    }
+                                  
+                                  ),
+                                ),
+                              ), 
+                            ),
+                            
+                            
+                        
+                        
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+
+
+                ),
               ),
-            ),
-          
+          ],),
+            ///
+
             Padding(
               padding: const EdgeInsets.only(top: 24.0),
               child: Text("Current Time in seconds: $_start", style: TextStyle(color: Colors.white38),),
@@ -207,13 +400,13 @@ class _StartUpState extends State<StartUp> {
                     label: Text("Restart Timer"),
                     icon: Icon(Icons.timer),
                     style: ButtonStyle(backgroundColor: WidgetStatePropertyAll(Colors.white)),
-              
+                  
                 ),
               ),
             ),
         
             Padding(
-              padding: const EdgeInsets.only(top: 8.0),
+              padding: EdgeInsets.only(top: 8.0, bottom: screenHeight-570),
         
               child: AnimatedContainer(
                 width: pauseTimer? 160: 180,
