@@ -1,4 +1,4 @@
-# tic80_mo
+# flutter_timer
 
 A new Flutter project.
 
